@@ -35,7 +35,9 @@ assert IN_QUERIES.exists(), (
     + f"\nTried to look it up at: {IN_QUERIES}."
 )
 
-IN_HEADERS = Path("config/headers.yaml")
+# Relative to this file
+x = ut.UTPATH
+IN_HEADERS = x.parents[2] / "config" / "headers.yaml"
 
 assert IN_HEADERS.exists(), (
     ut.bold_red("Input blast fields file not found.")

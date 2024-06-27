@@ -3,6 +3,8 @@ from pathlib import Path
 
 import pandas as pd
 
+UTPATH = Path(__file__)
+
 
 def read_yaml(y: Path) -> dict:
     import yaml
