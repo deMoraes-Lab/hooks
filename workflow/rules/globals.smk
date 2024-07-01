@@ -23,26 +23,26 @@ wildcard_constraints:
 
 IN_GENOMES = Path(config["genomes"])
 
-assert IN_GENOMES.exists(), (
-    ut.bold_red("Input genome assembly list file not found.")
-    + f"\nTried to look it up at: {IN_GENOMES}."
-)
+# assert IN_GENOMES.exists(), (
+#     ut.bold_red("Input genome assembly list file not found.")
+#     + f"\nTried to look it up at: {IN_GENOMES}"
+# )
 
 IN_QUERIES = Path(config["queries"])
 
-assert IN_QUERIES.exists(), (
-    ut.bold_red("Input query file not found.")
-    + f"\nTried to look it up at: {IN_QUERIES}."
-)
+# assert IN_QUERIES.exists(), (
+#     ut.bold_red("Input query file not found.")
+#     + f"\nTried to look it up at: {IN_QUERIES}"
+# )
 
 # Relative to this file
 x = ut.UTPATH
 IN_HEADERS = x.parents[2] / "config" / "headers.yaml"
 
-assert IN_HEADERS.exists(), (
-    ut.bold_red("Input blast fields file not found.")
-    + f"\nTried to look it up at: {IN_HEADERS}."
-)
+# assert IN_HEADERS.exists(), (
+#     ut.bold_red("Input blast fields file not found.")
+#     + f"\nTried to look it up at: {IN_HEADERS}"
+# )
 
 
 RESULTS = Path(config["results"])
@@ -100,3 +100,4 @@ BLAST_HEADER = "\t".join(["genome"] + blast_renamed)
 ALL_BLASTS = ut.for_all_genomes("_blast.tsv", RESULTS_GENOMES, GENOMES)
 ALL_HITS = ut.for_all_genomes("_hits.tsv", RESULTS_GENOMES, GENOMES)
 ALL_HOODS = ut.for_all_genomes("_neighborhoods.tsv", RESULTS_GENOMES, GENOMES)
+ALL_FAA = ut.for_all_genomes(".faa", RESULTS_GENOMES, GENOMES)

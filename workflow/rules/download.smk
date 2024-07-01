@@ -24,3 +24,12 @@ rule cds:
         """
         workflow/scripts/reduce_gff2cds.R {input} >| {output}
         """
+
+
+rule download_sentinel:
+    input:
+        ALL_FAA,
+    output:
+        f"{RESULTS}/download.sentinel",
+    shell:
+        "touch {output}"
