@@ -42,7 +42,7 @@ rule bind_hits:
         f"{RESULTS}/hits.tsv",
     params:
         header=CDS_HEADER,
-        tmp=f"{REULTS}/tmp_bind_hits.txt",
+        tmp=f"{RESULTS}/tmp_bind_hits.txt",
     shell:
         """
         fd -I '_hits.tsv' RESULTS | xargs cat > {params.tmp}
