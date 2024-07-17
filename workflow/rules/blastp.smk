@@ -42,7 +42,7 @@ rule bind_blasts:
         f"{RESULTS}/{BLASTS_TSV}",
     params:
         header=BLAST_HEADER,
-        tmp=f"{REULTS}/tmp_bind_blasts.txt",
+        tmp=f"{RESULTS}/tmp_bind_blasts.txt",
     shell:
         """
         fd -I '_blast.tsv' RESULTS | xargs cat > {params.tmp}
