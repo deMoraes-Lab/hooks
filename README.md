@@ -1,12 +1,11 @@
-
-# HOOX
+# HOOKS
 
 **v0.0.1**
 
 ## Description
 
 A [_snakemake pipeline_](https://snakemake.github.io/)
-to search for HMMs hits on database of bacterial genomes.
+to search for HMMs hits on a database of bacterial genomes.
 
 As additional features, the gene neighborhoods of
 any hit would be extracted and taxonomic information
@@ -102,7 +101,7 @@ An installer script is provided.
 1. Clone the repository.
 ``` sh
 git clone 'https://github.com/elbecerrasoto/hoox'
-cd hoox
+cd hooks
 ```
 
 2. Install the software through an _Anaconda Distribution_.
