@@ -101,7 +101,7 @@ An installer script is provided.
 
 1. Clone the repository.
 ``` sh
-git clone 'https://github.com/elbecerrasoto/hoox'
+git clone 'https://github.com/deMoraes-Lab/hooks'
 cd hooks
 ```
 
