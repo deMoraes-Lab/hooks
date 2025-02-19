@@ -107,6 +107,11 @@ git-config:
 	git config push.autoSetupRemote true
 
 
+.PHONY git-add-upstream:
+git-add-upstream:
+	git remote add upstream https://github.com/elbecerrasoto/hoox
+
+
 .PHONY clean:
 clean:
 	@rm -rf $(CLEAN)
