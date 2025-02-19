@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import re
 import subprocess as sp
 import sys
 from importlib import import_module
@@ -19,20 +20,25 @@ utils = import_module("utils")
 
 CPUS = int(sys.argv[1])
 OUT_DIR = Path(sys.argv[2])
-IN = Path(sys.argv[3])  # A tsv with a genome col
+IN = Path(sys.argv[3])  # A tsv with a header with genome col
 
 COMPRESS = False
+GENOMES_REGEX = r"GC[AF]_\d+\.\d"
 
 BATCH_SIZE = 256
-TRIES = 12
+MAX_TRIES = 256
+CHECK_PROGRESS = 8
+OVERWORK = 10
 
 BATCHES_DIR = Path(f"{OUT_DIR}/batches")
 
 NOT_FOUND = Path(f"{OUT_DIR}/not_found.tsv")
 NOT_FOUND_TXT = Path(f"{OUT_DIR}/.not_found.txt")
+NOT_FOUND_TXT.unlink(missing_ok=True)
 
 GENOMES = Path(f"{OUT_DIR}/genomes.tsv")
 GENOMES_TXT = Path(f"{OUT_DIR}/.genomes.txt")
+GENOMES_TXT.unlink(missing_ok=True)
 
 KEY = os.environ.setdefault("NCBI_DATASETS_APIKEY", "")
 
@@ -77,7 +83,7 @@ def worker(idx, genomes):
         faa = batch_dir / "ncbi_dataset" / "data" / genome / "protein.faa"
 
         if gff.is_file() and faa.is_file():
-            genome_dir.mkdir()
+            genome_dir.mkdir(exist_ok=True)
             gff = gff.rename(genome_dir / f"{genome}.gff")
             faa = faa.rename(genome_dir / f"{genome}.faa")
 
@@ -96,12 +102,19 @@ def worker(idx, genomes):
 
 def download(genomes: list[str]):
 
+    if len(genomes) == 0:
+        return []
+
     batches = np.array_split(genomes, int(np.ceil(len(genomes) / BATCH_SIZE)))
     batches = tuple(enumerate(batches))
 
+    try:
+        rmtree(BATCHES_DIR)
+    except FileNotFoundError:
+        pass
     BATCHES_DIR.mkdir(parents=True)
 
-    with Pool(CPUS) as p:
+    with Pool(CPUS*OVERWORK) as p:
         results = p.starmap(worker, batches)
 
     rmtree(BATCHES_DIR)
@@ -115,17 +128,43 @@ def download(genomes: list[str]):
 
 if __name__ == "__main__":
 
+    # It is more robust if it can
+    # read anything line by line
+    # and then extract anything that looks like
+    # an identifier
     df = pd.read_table(IN)
+    genomes = [
+        str(g) for g in df.genome if re.search(GENOMES_REGEX, str(g))
+    ]  # rm non-matching
+    genomes = set(df.genome)  # rm duplications
     genomes = list(df.genome)
 
+    def is_uncomplete(genome):
+        genome_dir = OUT_DIR / str(genome)
+        if genome_dir.exists():
+            gff = genome_dir / f"{genome}.gff"
+            faa = genome_dir / f"{genome}.faa"
+            complete = gff.exists() and faa.exists()
+            if complete:
+                with open(GENOMES_TXT, "a", encoding=ENCODING) as h:
+                    h.write(str(genome) + "\n")
+            return not complete
+        else:
+            return True
+
+    # rm already downloaded
+    genomes = list(filter(is_uncomplete, genomes))
+
     remaining_genomes = genomes
-    for i in range(TRIES):
+    for i in range(MAX_TRIES):
         remaining_genomes = download(remaining_genomes)
         if i == 0:
             last = remaining_genomes
-        else:
-            if not remaining_genomes or remaining_genomes == last:
-                break
+        elif (
+            not remaining_genomes or remaining_genomes == last
+        ) and i % CHECK_PROGRESS == 0:
+            break
+        last = remaining_genomes
 
     with open(NOT_FOUND_TXT, "w", encoding=ENCODING) as h:
         for g in remaining_genomes:
